@@ -10,6 +10,13 @@ use Test;
 BEGIN { plan tests => 13}
 
 use File::Spec;
+
+# Set up END block - this needs to happen before we load
+# File::Temp since this END block must be evaluated after the
+# END block configured by File::Temp
+my @files; # list of files to remove
+END { foreach (@files) { ok( !(-e $_) )} }
+
 use File::Temp qw/ tempfile unlink0 /;
 ok(1);
 
@@ -28,13 +35,13 @@ if ($skipplat) {
 
 }
 
-print "We will be skipping some tests : $skip\n";
+print "# We will be skipping some tests : $skip\n" if $skip;
 
 # start off with basic checking
 
 File::Temp->safe_level( File::Temp::STANDARD );
 
-print "Testing with STANDARD security...\n";
+print "# Testing with STANDARD security...\n";
 
 &test_security(0);
 
@@ -43,7 +50,7 @@ print "Testing with STANDARD security...\n";
 File::Temp->safe_level( File::Temp::MEDIUM )
   unless $skip;
 
-print "Testing with MEDIUM security...\n";
+print "# Testing with MEDIUM security...\n";
 
 # Now we need to start skipping tests
 &test_security($skip);
@@ -53,7 +60,7 @@ print "Testing with MEDIUM security...\n";
 File::Temp->safe_level( File::Temp::HIGH )
   unless $skip;
 
-print "Testing with HIGH security...\n";
+print "# Testing with HIGH security...\n";
 
 &test_security($skip);
 
@@ -81,23 +88,13 @@ sub test_security {
     return;
   }
 
-
-  # End blocks are evaluated in reverse order
-  # If I want to check that the file was unlinked by the autmoatic
-  # feature of the module I have to set up the end block before 
-  # creating the file.
-  # Use quoted end block to retain access to lexicals
-  my @files;
-
-  eval q{ END { foreach (@files) { ok( !(-e $_) )} } 1; } || die; 
-
-
+  # Create the tempfile
   my $template = "temptestXXXXXXXX";
   my ($fh1, $fname1) = tempfile ( $template, 
 				  DIR => File::Spec->curdir,
 				  UNLINK => 1,
 				);
-  print "Fname1 = $fname1\n";
+  print "# Fname1 = $fname1\n";
   ok( ( -e $fname1) );
 
   # Explicitly 

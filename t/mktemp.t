@@ -20,7 +20,7 @@ my $template = File::Spec->catfile(File::Spec->tmpdir, 'wowserXXXX');
 
 (my $fh, $template) = mkstemp($template);
 
-print "MKSTEMP: FH is $fh File is $template fileno=".fileno($fh)."\n";
+print "# MKSTEMP: FH is $fh File is $template fileno=".fileno($fh)."\n";
 # Check if the file exists
 ok( (-e $template) );
 
@@ -45,6 +45,7 @@ ok($string, $line);
 # stat(filehandle) does not always equal the size of the stat(filename)
 # This must be due to caching. In particular this test writes 7 bytes
 # to the file which are not recognised by stat(filename)
+# Simply waiting 3 seconds seems to be enough for the system to update
 
 if ($^O eq 'MSWin32') {
   sleep 3;
@@ -60,12 +61,19 @@ my $suffix = ".dat";
 
 ($fh, my $fname) = mkstemps($template, $suffix);
 
-print "MKSTEMPS: File is $template -> $fname fileno=".fileno($fh)."\n";
+print "# MKSTEMPS: File is $template -> $fname fileno=".fileno($fh)."\n";
 # Check if the file exists
 ok( (-e $fname) );
 
-ok( unlink0($fh, $fname) ); 
+# This fails if you are running on NFS
+# If this test fails simply skip it rather than doing a hard failure
+my $status = unlink0($fh, $fname);
 
+if ($status) {
+  ok($status);
+} else {
+  skip("Skip test failed probably due to NFS",1)
+}
 
 # MKDTEMP
 # Temp directory
@@ -74,7 +82,7 @@ $template = File::Spec->catdir(File::Spec->tmpdir, 'tmpdirXXXXXX');
 
 my $tmpdir = mkdtemp($template);
 
-print "MKDTEMP: Name is $tmpdir from template $template\n";
+print "# MKDTEMP: Name is $tmpdir from template $template\n";
 
 ok( (-d $tmpdir ) );
 
@@ -88,7 +96,7 @@ $template = File::Spec->catfile(File::Spec->tmpdir, 'mytestXXXXXX');
 
 my $tmpfile = mktemp($template);
 
-print "MKTEMP: Tempfile is $template -> $tmpfile\n";
+print "# MKTEMP: Tempfile is $template -> $tmpfile\n";
 
 # Okay if template no longer has XXXXX in
 
