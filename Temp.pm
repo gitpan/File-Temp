@@ -82,15 +82,18 @@ that the file will not exist by the time the caller opens the filename.
 
 =cut
 
-use v5.5.670;  # Uses S_IWOTH in Fcntl and auto-viv filehandles, new File::Spec
+# 5.6.0 gives us S_IWOTH, S_IWGRP, our and auto-vivifying filehandls
+# People would like a version on 5.005 so give them what they want :-)
+use 5.005;
 use strict;
 use Carp;
 use File::Spec 0.8;
 use File::Path qw/ rmtree /;
-use Fcntl 1.03 qw/ :DEFAULT S_IWOTH S_IWGRP /;
+use Fcntl 1.03;
 use Errno qw( EEXIST ENOENT ENOTDIR EINVAL );
 
-our ($VERSION, @EXPORT_OK, %EXPORT_TAGS, $DEBUG);
+# use 'our' on v5.6.0
+use vars qw($VERSION @EXPORT_OK %EXPORT_TAGS $DEBUG);
 
 $DEBUG = 0;
 
@@ -126,7 +129,7 @@ Exporter::export_tags('POSIX','mktemp');
 
 # Version number 
 
-$VERSION = '0.05';
+$VERSION = '0.07';
 
 # This is a list of characters that can be used in random filenames
 
@@ -322,18 +325,11 @@ sub _gettemp {
     # Default set
     $openflags = O_CREAT | O_EXCL | O_RDWR;
 
-    # Add the remainder as available
-    $openflags |= Fcntl::O_FOLLOW()
-      if eval { Fcntl::O_FOLLOW(); 1 };
-
-    $openflags |= Fcntl::O_BINARY()
-      if eval { Fcntl::O_BINARY(); 1 };
-
-    $openflags |= Fcntl::O_LARGEFILE()
-      if eval { Fcntl::O_LARGEFILE(); 1 };
-
-    $openflags |= Fcntl::O_EXLOCK()
-        if eval { Fcntl::O_EXLOCK(); 1 };
+    for my $oflag (qw/FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT TEMPORARY/) {
+        my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
+        no strict 'refs';
+        $openflags |= $bit if eval { $bit = &$func(); 1 };
+    }
 
   }
   
@@ -345,9 +341,15 @@ sub _gettemp {
     if ($options{"open"}) {
       my $fh;
 
+      # If we are running before perl5.6.0 we can not auto-vivify
+      if ($] < 5.006) {
+	require Symbol;
+	$fh = &Symbol::gensym;
+      }
+
       # Try to make sure this will be marked close-on-exec
       # XXX: Win32 doesn't respect this, nor the proper fcntl,
-      #      but may have O_NOINHERIT.  This is not in Fcntl.pm, though.
+      #      but may have O_NOINHERIT. This may or may not be in Fcntl.
       local $^F = 2; 
 
       # Store callers umask
@@ -542,8 +544,8 @@ sub _is_safe {
   # use 022 to check writability
   # Do it with S_IWOTH and S_IWGRP for portability (maybe)
   # mode is in info[2]
-  if (($info[2] & S_IWGRP) ||   # Is group writable?
-      ($info[2] & S_IWOTH) ) {  # Is world writable?
+  if (($info[2] & &Fcntl::S_IWGRP) ||   # Is group writable?
+      ($info[2] & &Fcntl::S_IWOTH) ) {  # Is world writable?
     return 0 unless -d _;       # Must be a directory
     return 0 unless -k _;       # Must be sticky
   }
@@ -568,10 +570,22 @@ sub _is_verysafe {
 
   # Should Get the value of _PC_CHOWN_RESTRICTED if it is defined
   # and If it is not there do the extensive test
+  my $chown_restricted;
+  $chown_restricted = &POSIX::_PC_CHOWN_RESTRICTED()
+    if eval { &POSIX::_PC_CHOWN_RESTRICTED(); 1};
 
-  # Check for chown giveaway
-  # Might want to do the directory splitting anyway
-  return _is_safe($path) if POSIX::sysconf( &POSIX::_PC_CHOWN_RESTRICTED);
+  # If chown_resticted is set to some value we should test it
+  if (defined $chown_restricted) {
+
+    # Return if the current directory is safe
+    return _is_safe($path) if POSIX::sysconf( $chown_restricted );
+
+  }
+
+  # To reach this point either, the _PC_CHOWN_RESTRICTED symbol
+  # was not avialable or the symbol was there but chown giveaway
+  # is allowed. Either way, we now have to test the entire tree for
+  # safety.
 
   # Convert path to an absolute directory if required
   unless (File::Spec->file_name_is_absolute($path)) {
@@ -599,7 +613,7 @@ sub _is_verysafe {
     print "TESTING DIR $dir\n" if $DEBUG;
 
     # Check the directory
-    return unless _is_safe($dir);
+    return 0 unless _is_safe($dir);
 
   }
 
@@ -609,21 +623,95 @@ sub _is_verysafe {
 
 
 # internal routine to determine whether unlink works on this
-# platform
+# platform for files that are currently open.
 # Returns true if we can, false otherwise.
-# Simply uses $^O rather than creating a temp file and trying
-# to delete it (the whole point of this module)
-# Currently we are using rmtree() to do this since
-# it can be supplied with a single file and knows about
-# different platforms.
 
-# Currently does nothing since File::Path::rmtree can unlink
-# on WinNT.
+# Currently WinNT can not unlink an opened file
 
-sub _can_unlink {
+sub _can_unlink_opened_file {
 
   
-  $^O ne 'MSWin32' ? 1 : 1;
+  $^O ne 'MSWin32' ? 1 : 0;
+
+}
+
+
+# This routine sets up a deferred unlinking of a specified
+# filename and filehandle. It is used in the following cases:
+#  - Called by unlink0 if an opend file can not be unlinked
+#  - Called by tempfile() if files are to be removed on shutdown
+#  - Called by tempdir() if directories are to be removed on shutdown
+
+# Arguments:
+#   _deferred_unlink( $fh, $fname, $isdir );
+#
+#   - filehandle (so that it can be expclicitly closed if open
+#   - filename   (the thing we want to remove)
+#   - isdir      (flag to indicate that we are being given a directory)
+#                 [and hence no filehandle]
+
+# Status is not referred since all the magic is done with END blocks
+
+sub _deferred_unlink {
+
+  croak 'Usage:  _deferred_unlink($fh, $fname, $isdir)'
+    unless scalar(@_) == 3;
+
+  my ($fh, $fname, $isdir) = @_;
+
+  warn "Setting up deferred removal of $fname\n"
+    if $DEBUG;
+
+  # If we have a directory, check that it is a directory
+  if ($isdir) {
+
+    if (-d $fname) {
+
+      # Directory exists so set up END block
+      # (quoted to preserve lexical variables)
+      eval q{
+	END {
+	  if (-d $fname) {
+	    rmtree($fname, $DEBUG, 1);
+	  }
+	}
+	1;
+      }  || die;
+
+    } else {
+      carp "Request to remove directory $fname could not be completed since it does not exists!\n";
+    }
+
+
+  } else {
+
+    if (-f $fname) {
+
+      # dile exists so set up END block
+      # (quoted to preserve lexical variables)
+      eval q{
+	END {
+	  # close the filehandle without checking its state
+	  # in order to make real sure that this is closed
+	  # if its already closed then I dont care about the answer
+	  # probably a better way to do this
+	  close($fh);
+
+	  if (-f $fname) {
+	    unlink $fname
+	      || warn "Error removing $fname";
+	  }
+	}
+	1;
+      } || die;
+
+    } else {
+      carp "Request to remove file $fname could not be completed since it is not there!\n";
+    }
+
+
+    
+  }
 
 }
 
@@ -647,9 +735,10 @@ files, as specified by the tmpdir() function in L<File::Spec>.
 
   ($fh, $filename) = tempfile($template);
 
-Create a temporary file using the template.  Trailing `X' characters
-are replaced with random letters to generate the filename.
-At least four `X' characters must be present in the template.
+Create a temporary file in the current directory using the supplied
+template.  Trailing `X' characters are replaced with random letters to
+generate the filename.  At least four `X' characters must be present
+in the template.
 
   ($fh, $filename) = tempfile($template, SUFFIX => $suffix)
 
@@ -675,7 +764,9 @@ and the file will automatically be deleted when closed (see
 the description of tmpfile() elsewhere in this document).
 This is the preferred mode of operation, as if you only 
 have a filehandle, you can never create a race condition
-by fumbling with the filename.
+by fumbling with the filename. On systems that can not unlink
+an open file (for example, Windows NT) the file is marked for
+deletion when the program ends (equivalent to setting UNLINK to 1).
 
   (undef, $filename) = tempfile($template, OPEN => 0);
 
@@ -757,11 +848,10 @@ sub tempfile {
 				    "suffixlen" => length($options{'SUFFIX'}),
 				   ) );  
 
-  # Setup an exit handler
-  # Do not perform the safe unlink0 since the filehandle may be
-  # closed and be invalid
-  # Return status is not checked.
-  END { rmtree($path, $DEBUG, 1) if ($options{"UNLINK"} && -f $path);  };
+  # Set up an exit handler that can do whatever is right for the
+  # system. Do not check return status since this is all done with
+  # END blocks
+  _deferred_unlink($fh, $path, 0) if $options{"UNLINK"};
   
   # Return
   if (wantarray()) {
@@ -773,9 +863,10 @@ sub tempfile {
     }
 
   } else {
-    # Assume that we can unlink the file with unlink0
-    # since the caller is not interested in the name
-    unlink0($fh, $path);
+
+    # Unlink the file. It is up to unlink0 to decide what to do with
+    # this (whether to unlink now or to defer until later)
+    unlink0($fh, $path) or croak "Error unlinking file $path using unlink0";
     
     # Return just the filehandle.
     return $fh;
@@ -836,6 +927,8 @@ Of course, if the template is not specified, the temporary directory
 will be created in tmpdir() and will also be removed at program exit.
 
 =cut
+
+# '
 
 sub tempdir  {
 
@@ -910,7 +1003,7 @@ sub tempdir  {
   
   # Install exit handler; must be dynamic to get lexical
   if ( $options{'CLEANUP'} && -d $tempdir) { 
-      eval q{ END { rmtree($tempdir,$DEBUG, 1) } 1; } || die; 	    
+    _deferred_unlink(undef, $tempdir, 1);
   } 
 
   # Return the dir name
@@ -1023,7 +1116,7 @@ Directory must be removed by the caller.
 
 =cut
 
-
+#' # for emacs
 
 sub mkdtemp {
 
@@ -1095,7 +1188,7 @@ If this is a problem, simply use mkstemp() and specify a template.
 
 When called in scalar context, returns the full name (including path)
 of a temporary file (uses mktemp()). The only check is that the file does
-not already exist, but there's no guarantee that that condition will
+not already exist, but there is no guarantee that that condition will
 continue to apply.
 
   $file = tmpnam();
@@ -1211,18 +1304,35 @@ Useful functions for dealing with the filehandle and filename.
 
 =item B<unlink0>
 
-Given an open filehandle and the associated filename, make
-a safe unlink. This is achieved by first checking that the filename
-and filehandle initially point to the same file and that the number
-of links to the file is 1.  Then the filename is unlinked and the
-filehandle checked once again to verify that the number of links
-on that file is now 0.  This is the closest you can come to making
-sure that the filename unlinked was the same as the file whose
-descriptor you hold.
+Given an open filehandle and the associated filename, make a safe
+unlink. This is achieved by first checking that the filename and
+filehandle initially point to the same file and that the number of
+links to the file is 1 (all fields returned by stat() are compared).
+Then the filename is unlinked and the filehandle checked once again to
+verify that the number of links on that file is now 0.  This is the
+closest you can come to making sure that the filename unlinked was the
+same as the file whose descriptor you hold.
 
   unlink0($fh, $path) or die "Error unlinking file $path safely";
 
-Returns false on error.
+Returns false on error. The filehandle is not closed since on some
+occasions this is not required.
+
+On some platforms, for example Windows NT, it is not possible to
+unlink an open file (the file must be closed first). On those
+platforms, the actual unlinking is deferred until the program ends
+and good status is returned. A check is still performed to make sure that
+the filehandle and filename are pointing to the same thing (but not at the time 
+the end block is executed since the deferred removal may not have access to
+the filehandle). 
+
+Additionally, on Windows NT not all the fields returned by stat() can
+be compared. For example, the C<dev> and C<rdev> fields seem to be different
+and also. Also, it seems that the size of the file returned by stat()
+does not always agree, with C<stat(FH)> being more accurate than
+C<stat(filename)>, presumably because of caching issues even when
+using autoflush (this is usually overcome by waiting a while after
+writing to the tempfile before attempting to C<unlink0> it).
 
 =cut
 
@@ -1234,12 +1344,8 @@ sub unlink0 {
   # Read args
   my ($fh, $path) = @_;
 
-  # Might as well return immediately if we cant unlink
-  # But still return success though
-  unless (_can_unlink()) {
-    warn "File $path can not be unlinked on this platform" if $^W;    
-    return 1;
-  }
+  warn "Unlinking $path using unlink0\n"
+    if $DEBUG;
 
   # Stat the filehandle
   my @fh = stat $fh;
@@ -1273,25 +1379,32 @@ sub unlink0 {
 
   # Now compare each entry explicitly by number
   for (@okstat) {
-    # print "Comparing: $_ : $fh[$_] and $path[$_]\n";
-    return 0 unless $fh[$_] == $path[$_];
+    print "Comparing: $_ : $fh[$_] and $path[$_]\n" if $DEBUG;
+    unless ($fh[$_] == $path[$_]) {
+      warn "Did not match $_ element of stat\n" if $DEBUG;
+      return 0;
+    }
   }
   
-  # remove the file (does not work on some platforms)
-  # Test is done earlier anyway!
-  if (_can_unlink()) {
-#    unlink($path) or return 0;
+  # attempt remove the file (does not work on some platforms)
+  if (_can_unlink_opened_file()) {
     # XXX: do *not* call this on a directory; possible race
     #      resulting in recursive removal
     croak "unlink0: $path has become a directory!" if -d $path;
-    rmtree ($path, $DEBUG,1) or return 0;
+    unlink($path) or return 0;
+
+    # Stat the filehandle
+    @fh = stat $fh;
+
+    print "Link count = $fh[3] \n" if $DEBUG;
+
+    # Make sure that the link count is zero
+    return ( $fh[3] == 0 ? 1 : 0);
+
+  } else {
+    _deferred_unlink($fh, $path, 0);
+    return 1;
   }
-
-  # Stat the filehandle
-  @fh = stat $fh;
-
-  # Make sure that the link count is zero
-  return ( $fh[3] == 0 ? 1 : 0);
 
 }
 
@@ -1337,8 +1450,10 @@ sysconf() function. If this is a possibility, each directory in the
 path is checked in turn for safeness, recursively walking back to the 
 root directory.
 
-Will not work on platforms that do not support the L<POSIX|POSIX>
-C<_PC_CHOWN_RESTRICTED> symbol (for example, Windows NT).
+For platforms that do not support the L<POSIX|POSIX>
+C<_PC_CHOWN_RESTRICTED> symbol (for example, Windows NT) it is 
+assumed that ``chown() giveaway'' is possible and the recursive test
+is performed.
 
 =back
 
@@ -1347,6 +1462,13 @@ The level can be changed as follows:
   File::Temp->safe_level( File::Temp::HIGH );
 
 The level constants are not exported by the module.
+
+Currently, you must be running at least perl v5.6.0 in order to
+run with MEDIUM or HIGH security. This is simply because the 
+safety tests use functions from L<Fcntl|Fcntl> that are not
+available in older versions of perl. The problem is that the version
+number for Fcntl is the same in perl 5.6.0 and in 5.005_03 even though
+they are different versions.....
 
 =cut
 
@@ -1360,6 +1482,10 @@ The level constants are not exported by the module.
       if (($level != STANDARD) && ($level != MEDIUM) && ($level != HIGH)) {
 	carp "safe_level: Specified level ($level) not STANDARD, MEDIUM or HIGH - ignoring\n";
       } else {
+	if ($] < 5.006 && $level != STANDARD) {
+	  # Cant do MEDIUM or HIGH checks
+	  croak "Currently requires perl 5.006 or newer to do the safe checks";
+	}
         $LEVEL = $level; 
       }
     }
