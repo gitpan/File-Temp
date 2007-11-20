@@ -9,6 +9,8 @@ t/security.t
 t/object.t
 t/seekable.t
 t/cmp.t
+t/fork.t
+t/lock.t
 ChangeLog
 misc/benchmark.pl
 misc/results.txt

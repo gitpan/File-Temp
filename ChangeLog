@@ -1,3 +1,80 @@
+2007-11-19  Tim Jenness  <tjenness@cpan.org>
+
+	----- Release V0.19 CPAN -----
+	
+	* Temp.pm (tempfile): Add EXLOCK option which can be used to disable O_EXLOCK
+
+	* t/lock.t: Test ability to disable O_EXLOCK
+	
+2007-11-16  Tim Jenness  <tjenness@cpan.org>
+
+	* Temp.pm (newdir): Add object oriented interface to "tempdir". Use
+	File::Temp->newdir()
+
+2007-11-15  Tim Jenness  <tjenness@cpan.org>
+
+	* Temp.pm (tempdir): Add a note to the tempdir documentation to
+	clarify that the default is for the directory not to be temporary
+	and that use of an OO approach may be required (thanks to David
+	Golden's annotation on CPAN).
+	
+	* Temp.pm (_randchar): Remove _randchar function (no longer used) 
+
+	* Temp.pm: Add note  about File::Tempdir module
+	
+2007-11-14  Tim Jenness  <tjenness@cpan.org>
+
+	* Temp.pm (new): Track pid used when file created and make sure
+	object destructor deletes the file only when the current pid
+	matches the original pid (RT#11067 again - thanks to Grousse)
+	Added new test (fork.t) to test this behaviour.
+
+	* t/seekable.t: Add tests to verify fix for RT#22052
+	
+2007-11-01  Tim Jenness  <tjenness@cpan.org>
+
+	* Temp.pm (_is_safe): Correct cluck message to match uid check
+	(thanks to Alexey Tourbin RT #14218)
+
+	* Temp.pm: Add note on use of binmode to modify encoding. (prompted
+	by Wolfgang Husmann)
+	
+2007-10-31  Tim Jenness  <tjenness@cpan.org>
+
+	* Temp.pm (tempfile): Add TMPDIR flag to simplify 
+	    tempdir(template, DIR => File::Spec->tmpdir) and to remove confusion
+	for tempdir interface. (thanks to Brendan O'Dea - debian bug #351373)
+
+	* META.yml: Update to v1.0 spec YAML spec. (thanks to Alexandr Ciornii RT# 23524)
+
+	* Temp.pm: Localize $@ when using eval to prevent leakage (prompted by Zefram)
+	
+	* Makefile.PL: Support LICENSE in newer ExtUtils::MakeMaker implementations
+	(thanks to Alexandr Ciornii RT #23524)
+
+2007-10-31  Tim Jenness  <tjenness@cpan.org>
+
+	* t/seekable.t: Skip seek test on older IO::Seekable versions.
+	(thanks to Sebastien Aperghis-Tramoni RT #23524)
+	
+	* Temp.pm: Allow XXX replacement to run on perl 5.005 and 5.004.
+	(thanks to Sebastien Aperghis-Tramoni RT #23524)
+
+2007-10-29  Tim Jenness  <tjenness@cpan.org>
+
+	* Temp.pm: Fix range of random character determination such that the last character
+	in the list (_) will appear occassionally. (Thanks to Peter Dintelmann perl RT# 41345)
+
+	* Temp.pm: Clarify error message when parent directory does not exist (thanks to
+	Peter Dintelmann perl RT # 41346)
+
+	* Temp.pm: Carp::Heavy does not exist on older perls (eg 5.005) so wrap the require
+	in an eval (Thanks to Sebastien Aperghis-Tramoni, Jesse Vincent, Slaven Rezic
+	and Robin Barker RT #26841)
+
+	* Temp.pm: Replace "new File::Temp" with "File::Temp->new" at the behest of H. Merijn 
+	Brand
+	
 2007-01-21 Tim Jenness <tjenness@cpan.org>
 
 	--- RELEASE 0.18 CPAN ---
@@ -9,6 +86,8 @@
 	(thanks to Peter Dintelmann, Gisle Aas)
 
 	* t/cmp.t: New test file
+
+	* Temp.pm: Export SEEK_* constants (Matt Lawrence RT #22052)
 	
 2006-08-18  Tim Jenness  <tjenness@cpan.org>
 
