@@ -1,17 +1,23 @@
 --- #YAML:1.0
-name:                File-Temp
-version:             0.20
-abstract:            return name and handle of a temporary file safely
-license:             perl
-generated_by:        ExtUtils::MakeMaker version 6.36
-distribution_type:   module
-requires:     
-    Fcntl:                         1.03
-    File::Path:                    0
-    File::Spec:                    0.8
-    Test::More:                    0
-meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
-    version: 1.2
+name:               File-Temp
+version:            0.21
+abstract:           return name and handle of a temporary file safely
 author:
     - Tim Jenness <tjenness@cpan.org>
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Fcntl:       1.03
+    File::Path:  0
+    File::Spec:  0.8
+    Test::More:  0
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.48
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4
