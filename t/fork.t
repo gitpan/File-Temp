@@ -5,13 +5,26 @@ $| = 1;
 
 use strict;
 
-BEGIN { print "1..8\n"; }
+BEGIN {
+  require Config;
+  my $can_fork = $Config::Config{d_fork} ||
+    (($^O eq 'MSWin32' || $^O eq 'NetWare') and
+     $Config::Config{useithreads} and
+     $Config::Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/
+    );
+  if ( $can_fork ) {
+    print "1..8\n";
+  } else {
+    print "1..0 # Skip No fork available\n";
+    exit;
+  }
+}
 
 use File::Temp;
 
 # OO interface
 
-my $file = File::Temp->new(CLEANUP=>1);
+my $file = File::Temp->new();
 
 myok( 1, -f $file->filename, "OO File exists" );
 
@@ -47,7 +60,7 @@ myok( 4, -f $file->filename(), "OO File exists in parent" );
 
 # non-OO interface
 
-my ($fh, $filename) = File::Temp::tempfile( CLEANUP => 1 );
+my ($fh, $filename) = File::Temp::tempfile( UNLINK => 1 );
 
 myok( 5, -f $filename, "non-OO File exists" );
 
