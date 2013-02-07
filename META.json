@@ -1,0 +1,57 @@
+{
+   "abstract" : "return name and handle of a temporary file safely",
+   "author" : [
+      "Tim Jenness <tjenness@cpan.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.3901, CPAN::Meta::Converter version 2.120630",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "File-Temp",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Cwd" : "0",
+            "Test::More" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.36"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Fcntl" : "1.03",
+            "File::Path" : "2.06",
+            "File::Spec" : "0.8"
+         }
+      }
+   },
+   "provides" : {
+      "File::Temp" : {
+         "file" : "lib/File/Temp.pm",
+         "version" : "0.22_90"
+      },
+      "File::Temp::Dir" : {
+         "file" : "lib/File/Temp.pm",
+         "version" : 0
+      }
+   },
+   "release_status" : "testing",
+   "resources" : {
+      "homepage" : "http://github.com/Perl-Toolchain-Gang/File-Temp/tree/master",
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ],
+      "repository" : {
+         "url" : "git://github.com/Perl-Toolchain-Gang/File-Temp.git"
+      }
+   },
+   "version" : "0.22_90"
+}
