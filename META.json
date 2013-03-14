@@ -36,14 +36,14 @@
    "provides" : {
       "File::Temp" : {
          "file" : "lib/File/Temp.pm",
-         "version" : "0.22_90"
+         "version" : "0.23"
       },
       "File::Temp::Dir" : {
          "file" : "lib/File/Temp.pm",
          "version" : 0
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "homepage" : "http://github.com/Perl-Toolchain-Gang/File-Temp/tree/master",
       "license" : [
@@ -53,5 +53,5 @@
          "url" : "git://github.com/Perl-Toolchain-Gang/File-Temp.git"
       }
    },
-   "version" : "0.22_90"
+   "version" : "0.23"
 }
