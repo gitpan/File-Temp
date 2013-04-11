@@ -2,31 +2,45 @@
 abstract: 'return name and handle of a temporary file safely'
 author:
   - 'Tim Jenness <tjenness@cpan.org>'
-build_requires:
-  Cwd: 0
-  Test::More: 0
+build_requires: {}
 configure_requires:
-  Module::Build: 0.36
-dynamic_config: 1
-generated_by: 'Module::Build version 0.3901, CPAN::Meta::Converter version 2.120630'
+  ExtUtils::MakeMaker: 6.30
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.300031, CPAN::Meta::Converter version 2.130880'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: File-Temp
+no_index:
+  directory:
+    - t
+    - xt
+    - examples
+    - corpus
+  package:
+    - DB
 provides:
   File::Temp:
     file: lib/File/Temp.pm
-    version: 0.23
+    version: 0.2301
   File::Temp::Dir:
     file: lib/File/Temp.pm
-    version: 0
+    version: 0.2301
 requires:
   Fcntl: 1.03
   File::Path: 2.06
   File::Spec: 0.8
+  perl: v5.8.3
 resources:
-  homepage: http://github.com/Perl-Toolchain-Gang/File-Temp/tree/master
-  license: http://dev.perl.org/licenses/
+  bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp
+  homepage: https://metacpan.org/release/File-Temp
   repository: git://github.com/Perl-Toolchain-Gang/File-Temp.git
-version: 0.23
+version: 0.2301
+x_contributors:
+  - 'Ben Tilly <btilly@gmail.com>'
+  - 'David Golden <dagolden@cpan.org>'
+  - 'Ed Avis <eda@linux01.wcl.local>'
+  - 'James E. Keenan <jkeen@verizon.net>'
+  - 'Kevin Ryde <user42@zip.com.au>'
+  - 'Peter John Acklam <pjacklam@online.no>'
