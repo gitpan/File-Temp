@@ -2,7 +2,7 @@ NAME
     File::Temp - return name and handle of a temporary file safely
 
 VERSION
-    version 0.2301
+    version 0.2302
 
 SYNOPSIS
       use File::Temp qw/ tempfile tempdir /;
@@ -774,16 +774,16 @@ SEE ALSO
 SUPPORT
   Bugs / Feature Requests
     Please report any bugs or feature requests through the issue tracker at
-    <https://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp>. You will
+    <http://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp>. You will
     be notified automatically of any progress on your issue.
 
   Source Code
     This is open source software. The code repository is available for
     public review and contribution under the terms of the license.
 
-    <http://github.com/Perl-Toolchain-Gang/File-Temp>
+    <https://github.com/Perl-Toolchain-Gang/File-Temp>
 
-      git clone git://github.com/Perl-Toolchain-Gang/File-Temp.git
+      git clone https://github.com/Perl-Toolchain-Gang/File-Temp.git
 
 AUTHOR
     Tim Jenness <tjenness@cpan.org>
@@ -793,13 +793,21 @@ CONTRIBUTORS
 
     *   David Golden <dagolden@cpan.org>
 
+    *   David Steinbrunner <dsteinbrunner@pobox.com>
+
     *   Ed Avis <eda@linux01.wcl.local>
 
     *   James E. Keenan <jkeen@verizon.net>
 
+    *   Karen Etheridge <ether@cpan.org>
+
     *   Kevin Ryde <user42@zip.com.au>
 
+    *   Olivier Mengue <dolmen@cpan.org>
+
     *   Peter John Acklam <pjacklam@online.no>
+
+    *   Peter Rabbitson <ribasushi@cpan.org>
 
 COPYRIGHT AND LICENSE
     This software is copyright (c) 2013 by Tim Jenness and the UK Particle

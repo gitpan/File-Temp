@@ -4,7 +4,7 @@
       "Tim Jenness <tjenness@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300031, CPAN::Meta::Converter version 2.130880",
+   "generated_by" : "Dist::Zilla version 4.300039, CPAN::Meta::Converter version 2.132620",
    "license" : [
       "perl_5"
    ],
@@ -27,7 +27,7 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "6.30"
+            "ExtUtils::MakeMaker" : "6.17"
          }
       },
       "develop" : {
@@ -40,44 +40,59 @@
       },
       "runtime" : {
          "requires" : {
+            "Exporter" : "5.57",
             "Fcntl" : "1.03",
             "File::Path" : "2.06",
             "File::Spec" : "0.8",
-            "perl" : "v5.8.3"
+            "parent" : "0.221",
+            "perl" : "5.006"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "File::Spec" : "0",
+            "File::Temp" : "0",
+            "IO::Handle" : "0",
+            "IPC::Open3" : "0",
+            "Test::More" : "0"
          }
       }
    },
    "provides" : {
       "File::Temp" : {
          "file" : "lib/File/Temp.pm",
-         "version" : "0.2301"
+         "version" : "0.2302"
       },
       "File::Temp::Dir" : {
          "file" : "lib/File/Temp.pm",
-         "version" : "0.2301"
+         "version" : "0.2302"
       }
    },
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "mailto" : "bug-File-Temp@rt.cpan.org",
-         "web" : "https://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp"
+         "web" : "http://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp"
       },
-      "homepage" : "https://metacpan.org/release/File-Temp",
+      "homepage" : "https://github.com/Perl-Toolchain-Gang/File-Temp",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/Perl-Toolchain-Gang/File-Temp.git",
-         "web" : "http://github.com/Perl-Toolchain-Gang/File-Temp"
+         "url" : "https://github.com/Perl-Toolchain-Gang/File-Temp.git",
+         "web" : "https://github.com/Perl-Toolchain-Gang/File-Temp"
       }
    },
-   "version" : "0.2301",
+   "version" : "0.2302",
+   "x_authority" : "cpan:TJENNESS",
    "x_contributors" : [
       "Ben Tilly <btilly@gmail.com>",
       "David Golden <dagolden@cpan.org>",
+      "David Steinbrunner <dsteinbrunner@pobox.com>",
       "Ed Avis <eda@linux01.wcl.local>",
       "James E. Keenan <jkeen@verizon.net>",
+      "Karen Etheridge <ether@cpan.org>",
       "Kevin Ryde <user42@zip.com.au>",
-      "Peter John Acklam <pjacklam@online.no>"
+      "Olivier Mengue <dolmen@cpan.org>",
+      "Peter John Acklam <pjacklam@online.no>",
+      "Peter Rabbitson <ribasushi@cpan.org>"
    ]
 }
 

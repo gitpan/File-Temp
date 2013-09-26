@@ -10,10 +10,16 @@ use File::Spec::Functions;
 use List::Util qw/max/;
 
 my @modules = qw(
+  Exporter
   ExtUtils::MakeMaker
   Fcntl
   File::Path
   File::Spec
+  File::Temp
+  IO::Handle
+  IPC::Open3
+  Test::More
+  parent
   perl
 );
 
