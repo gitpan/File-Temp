@@ -1,6 +1,6 @@
 package File::Temp;
 # ABSTRACT: return name and handle of a temporary file safely
-our $VERSION = '0.2302'; # VERSION
+our $VERSION = '0.2303'; # VERSION
 
 
 # 5.6.0 gives us S_IWOTH, S_IWGRP, our and auto-vivifying filehandles
@@ -1632,7 +1632,7 @@ File::Temp - return name and handle of a temporary file safely
 
 =head1 VERSION
 
-version 0.2302
+version 0.2303
 
 =head1 SYNOPSIS
 

@@ -4,7 +4,7 @@
       "Tim Jenness <tjenness@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300039, CPAN::Meta::Converter version 2.132620",
+   "generated_by" : "Dist::Zilla version 4.300039, CPAN::Meta::Converter version 2.132810",
    "license" : [
       "perl_5"
    ],
@@ -47,25 +47,16 @@
             "parent" : "0.221",
             "perl" : "5.006"
          }
-      },
-      "test" : {
-         "requires" : {
-            "File::Spec" : "0",
-            "File::Temp" : "0",
-            "IO::Handle" : "0",
-            "IPC::Open3" : "0",
-            "Test::More" : "0"
-         }
       }
    },
    "provides" : {
       "File::Temp" : {
          "file" : "lib/File/Temp.pm",
-         "version" : "0.2302"
+         "version" : "0.2303"
       },
       "File::Temp::Dir" : {
          "file" : "lib/File/Temp.pm",
-         "version" : "0.2302"
+         "version" : "0.2303"
       }
    },
    "release_status" : "stable",
@@ -80,7 +71,7 @@
          "web" : "https://github.com/Perl-Toolchain-Gang/File-Temp"
       }
    },
-   "version" : "0.2302",
+   "version" : "0.2303",
    "x_authority" : "cpan:TJENNESS",
    "x_contributors" : [
       "Ben Tilly <btilly@gmail.com>",

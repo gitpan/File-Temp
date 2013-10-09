@@ -2,16 +2,11 @@
 abstract: 'return name and handle of a temporary file safely'
 author:
   - 'Tim Jenness <tjenness@cpan.org>'
-build_requires:
-  File::Spec: 0
-  File::Temp: 0
-  IO::Handle: 0
-  IPC::Open3: 0
-  Test::More: 0
+build_requires: {}
 configure_requires:
   ExtUtils::MakeMaker: 6.17
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300039, CPAN::Meta::Converter version 2.132620'
+generated_by: 'Dist::Zilla version 4.300039, CPAN::Meta::Converter version 2.132810'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -28,10 +23,10 @@ no_index:
 provides:
   File::Temp:
     file: lib/File/Temp.pm
-    version: 0.2302
+    version: 0.2303
   File::Temp::Dir:
     file: lib/File/Temp.pm
-    version: 0.2302
+    version: 0.2303
 requires:
   Exporter: 5.57
   Fcntl: 1.03
@@ -43,7 +38,7 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp
   homepage: https://github.com/Perl-Toolchain-Gang/File-Temp
   repository: https://github.com/Perl-Toolchain-Gang/File-Temp.git
-version: 0.2302
+version: 0.2303
 x_authority: cpan:TJENNESS
 x_contributors:
   - 'Ben Tilly <btilly@gmail.com>'

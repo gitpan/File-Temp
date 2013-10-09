@@ -26,14 +26,8 @@ my %WriteMakefileArgs = (
     "File::Spec" => "0.8",
     "parent" => "0.221"
   },
-  "TEST_REQUIRES" => {
-    "File::Spec" => 0,
-    "File::Temp" => 0,
-    "IO::Handle" => 0,
-    "IPC::Open3" => 0,
-    "Test::More" => 0
-  },
-  "VERSION" => "0.2302",
+  "TEST_REQUIRES" => {},
+  "VERSION" => "0.2303",
   "test" => {
     "TESTS" => "t/*.t"
   }
