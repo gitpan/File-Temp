@@ -2,7 +2,7 @@ NAME
     File::Temp - return name and handle of a temporary file safely
 
 VERSION
-    version 0.2303
+    version 0.2304
 
 SYNOPSIS
       use File::Temp qw/ tempfile tempdir /;

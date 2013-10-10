@@ -20,14 +20,33 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "NAME" => "File::Temp",
   "PREREQ_PM" => {
+    "Carp" => 0,
+    "Carp::Heavy" => 0,
+    "Cwd" => 0,
     "Exporter" => "5.57",
     "Fcntl" => "1.03",
     "File::Path" => "2.06",
     "File::Spec" => "0.8",
-    "parent" => "0.221"
+    "IO::Handle" => 0,
+    "IO::Seekable" => 0,
+    "POSIX" => 0,
+    "Scalar::Util" => 0,
+    "Symbol" => 0,
+    "constant" => 0,
+    "overload" => 0,
+    "parent" => "0.221",
+    "strict" => 0,
+    "vars" => 0
   },
-  "TEST_REQUIRES" => {},
-  "VERSION" => "0.2303",
+  "TEST_REQUIRES" => {
+    "ExtUtils::MakeMaker" => 0,
+    "File::Spec::Functions" => 0,
+    "FileHandle" => 0,
+    "List::Util" => 0,
+    "Test::More" => 0,
+    "warnings" => 0
+  },
+  "VERSION" => "0.2304",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -62,6 +81,10 @@ unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
 
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
   unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+if ( $^O eq 'VMS' ) {
+	$WriteMakefileArgs{PREREQ_PM}{'VMS::Stdio'} = '0';
+}
 
 $WriteMakefileArgs{INSTALLDIRS} = 'perl'
     if $] >= 5.006001 && $] <= 5.011000;

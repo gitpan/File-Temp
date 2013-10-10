@@ -10,13 +10,30 @@ use File::Spec::Functions;
 use List::Util qw/max/;
 
 my @modules = qw(
+  Carp
+  Carp::Heavy
+  Cwd
   Exporter
   ExtUtils::MakeMaker
   Fcntl
   File::Path
   File::Spec
+  File::Spec::Functions
+  FileHandle
+  IO::Handle
+  IO::Seekable
+  List::Util
+  POSIX
+  Scalar::Util
+  Symbol
+  Test::More
+  constant
+  overload
   parent
   perl
+  strict
+  vars
+  warnings
 );
 
 # replace modules with dynamic results from MYMETA.json if we can
